@@ -1,6 +1,6 @@
 # fastatools
 #
-# VERSION               golob/fastatools:0.5__bcw.0.3.0
+# VERSION               golob/fastatools:0.6.4__bcw.0.3.0
 
 FROM      alpine:3.7
 RUN mkdir /fh && mkdir /app
@@ -15,6 +15,7 @@ bucket_command_wrapper==0.3.0 \
 fastalite>=0.3
 
 ADD combine_fasta.py /usr/local/bin
+ADD combine_fastq_pairs.py /usr/local/bin
 ADD fasta_a_not_b.py /usr/local/bin
 ADD fasta_seq_info.py /usr/local/bin
 ADD seqs_below_minbest.py /usr/local/bin

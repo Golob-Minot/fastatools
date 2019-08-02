@@ -6,7 +6,7 @@ import fastalite
 #
 #   Given at least set(s) of paired reads in fastq format,
 #   combine into one pair of reads, in order for each pair
-#   Modest restrictions to keep things moving: 
+#   Modest restrictions to keep things moving:
 #       Pairs should be in order
 #       Reads should be in order.
 #
@@ -86,12 +86,31 @@ def main():
     IDs_R2 = set()
     logging.info("Looping through files to identify all sequence IDs")
     for r1_h, r2_h in zip(args.in_1, args.in_2):
-        file_ids_r1 = {
-            get_seq_id(sr.id, args.normalize_ids) for sr in fastalite.fastqlite(r1_h)
-        }
-        file_ids_r2 = {
-            get_seq_id(sr.id, args.normalize_ids) for sr in fastalite.fastqlite(r2_h)
-        }
+        # Will not use list comprehension to allow for error handling...
+        file_ids_r1 = set()
+        r1_reader = fastalite.fastqlite(r1_h)
+        try:
+            while True:
+                try:
+                    sr = next(r1_reader)
+                    file_ids_r1.add(get_seq_id(sr.id, args.normalize_ids))
+                except ValueError:
+                    pass
+        except StopIteration:
+            pass
+
+        file_ids_r2 = set()
+        r2_reader = fastalite.fastqlite(r2_h)
+        try:
+            while True:
+                try:
+                    sr = next(r2_reader)
+                    file_ids_r2.add(get_seq_id(sr.id, args.normalize_ids))
+                except ValueError:
+                    pass
+        except StopIteration:
+            pass
+
         if len(IDs_R1.intersection(file_ids_r1)) > 0:
             logging.warning("{:,} of {:,} R1 read IDs from this file overlap with others".format(
                 len(IDs_R1.intersection(file_ids_r1)),
@@ -118,9 +137,19 @@ def main():
     for r1_h, r2_h in zip(args.in_1, args.in_2):
         srs_r1 = fastalite.fastqlite(r1_h)
         srs_r2 = fastalite.fastqlite(r2_h)
+        sr_1 = None
+        sr_2 = None
         try:
-            sr_1 = next(srs_r1)
-            sr_2 = next(srs_r2)
+            while sr_1 is None:
+                try:
+                    sr_1 = next(srs_r1)
+                except ValueError:
+                    sr_1 = None
+            while sr_2 is None:
+                try:
+                    sr_2 = next(srs_r2)
+                except ValueError:
+                    sr_2 = None
             while len(overlapped_ids) > 0:
                 if len(overlapped_ids) % 10000 == 0:
                     logging.info(
@@ -129,10 +158,16 @@ def main():
                             starting_num_ids,
                         )
                     )
-                while get_seq_id(sr_1.id, args.normalize_ids) not in overlapped_ids:
-                    sr_1 = next(srs_r1)
-                while get_seq_id(sr_2.id, args.normalize_ids) not in overlapped_ids:
-                    sr_2 = next(srs_r2)
+                while (sr_1 is None) or (get_seq_id(sr_1.id, args.normalize_ids) not in overlapped_ids):
+                    try:
+                        sr_1 = next(srs_r1)
+                    except ValueError:
+                        sr_1 = None
+                while (sr_2 is None) or (get_seq_id(sr_2.id, args.normalize_ids) not in overlapped_ids):
+                    try:
+                        sr_2 = next(srs_r2)
+                    except ValueError:
+                        sr_2 = None
                 assert get_seq_id(sr_1.id, args.normalize_ids) == get_seq_id(sr_2.id, args.normalize_ids), "Order off of reads"
                 # Implicit else paired and shared.
                 # Remove it from the target list (takes care of duplicates)
@@ -141,13 +176,16 @@ def main():
                 write_fastq(sr_1, args.out_1)
                 write_fastq(sr_2, args.out_2)
                 # move to next
-                sr_1 = next(srs_r1)
-                sr_2 = next(srs_r2)
+                try:
+                    sr_1 = next(srs_r1)
+                except ValueError:
+                    pass
+                try:
+                    sr_2 = next(srs_r2)
+                except ValueError:
+                    pass
         except StopIteration:
             pass
-
-
-
 
 if __name__ == "__main__":
     main()
