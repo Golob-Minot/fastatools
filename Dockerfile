@@ -1,13 +1,14 @@
 # fastatools
 #
-# VERSION               golob/fastatools:0.7.0__bcw.0.3.0
+# VERSION               golob/fastatools:0.7.1__bcw.0.3.1
 
 FROM      alpine:3.8
-RUN apk add --no-cache python3 bash
+RUN apk add --no-cache python3-dev build-base bash
 RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pip3 install \
 boto3 \
 awscli \
+biopython \
 bucket_command_wrapper==0.3.1 \
 fastalite>=0.3
 
