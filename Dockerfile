@@ -4,7 +4,11 @@
 
 FROM biocontainers/biocontainers:v1.1.0_cv2
 USER root
-RUN apt-get update && apt-get install -y python3 python3-pip
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    apt-get clean && \
+    apt-get purge && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 RUN ln -s /usr/bin/python3 /usr/bin/python
 USER biodocker
 RUN pip3 install \
