@@ -2,7 +2,7 @@
 #
 # VERSION               golob/fastatools:0.7.1__bcw.0.3.1
 
-FROM      alpine:3.8
+FROM biocontainers/biocontainers:v1.1.0_cv2
 RUN apk add --no-cache python3-dev build-base bash
 RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pip3 install \
