@@ -29,4 +29,6 @@ RUN chmod +x /usr/local/bin/*.py
 
 RUN mkdir /fh && mkdir /app
 RUN mkdir -p /mnt/inputs/file && mkdir -p /mnt/outputs/file && mkdir /scratch
+RUN chown biodocker /tmp
+RUN chgrp biodocker /tmp
 USER biodocker
