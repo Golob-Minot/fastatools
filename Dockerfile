@@ -1,6 +1,6 @@
 # fastatools
 #
-# VERSION               golob/fastatools:0.7.1__bcw.0.3.1
+# VERSION               golob/fastatools:0.7.1__bcw.0.3.1A
 
 FROM biocontainers/biocontainers:v1.1.0_cv2
 USER root
